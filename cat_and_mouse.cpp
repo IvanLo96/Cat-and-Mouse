@@ -36,14 +36,23 @@ void inicializarTablero() {
     tablero[filaGato][columnaGato] = GATO;
 }
 
-void imprimirTablero(vector<vector<char>> &tablero) {
+void imprimirTablero(vector<vector<char>>& tablero) {
     for (int i = 0; i < FILAS; i++) {
         for (int j = 0; j < COLUMNAS; j++) {
-            cout << tablero[i][j] << " ";
+            if (tablero[i][j] == RATON) {
+                cout << "R ";
+            } else if (tablero[i][j] == GATO) {
+                cout << "G ";
+            } else if (tablero[i][j] == SALIDA) {
+                cout << "S ";
+            } else {
+                cout << ". ";
+            }
         }
         cout << endl;
     }
 }
+
 
 bool ratonAlcanzaSalida(vector<vector<char>> &tablero) {
     int filaRaton, columnaRaton;
@@ -124,7 +133,7 @@ int evaluarGato(vector<vector<char>>& tablero) {
     return -distancia;
 }
 
-int minimax(vector<vector<char>>& tablero, int profundidad, bool esMaximizador) {
+int gatoMinimax(vector<vector<char>>& tablero, int profundidad, bool esMaximizador) {
     // Verificar si se alcanzó la profundidad máxima o si el juego ha terminado
     if (profundidad == 0 || gatoAtrapaRaton(tablero) || ratonAlcanzaSalida(tablero)) {
         return evaluarGato(tablero); // Usar la función de evaluación para terminar la recursión
@@ -136,7 +145,7 @@ int minimax(vector<vector<char>>& tablero, int profundidad, bool esMaximizador) 
             for (int columna = 0; columna < COLUMNAS; columna++) {
                 if (tablero[fila][columna] == VACIO && esPosicionValida(tablero, fila, columna)) {
                     tablero[fila][columna] = GATO;
-                    int puntuacion = minimax(tablero, profundidad - 1, false);
+                    int puntuacion = gatoMinimax(tablero, profundidad - 1, false);
                     tablero[fila][columna] = VACIO;
                     mejorPuntuacion = max(mejorPuntuacion, puntuacion);
                 }
@@ -149,7 +158,7 @@ int minimax(vector<vector<char>>& tablero, int profundidad, bool esMaximizador) 
             for (int columna = 0; columna < COLUMNAS; columna++) {
                 if (tablero[fila][columna] == VACIO && esPosicionValida(tablero, fila, columna)) {
                     tablero[fila][columna] = RATON;
-                    int puntuacion = minimax(tablero, profundidad - 1, true);
+                    int puntuacion = gatoMinimax(tablero, profundidad - 1, true);
                     tablero[fila][columna] = VACIO;
                     mejorPuntuacion = min(mejorPuntuacion, puntuacion);
                 }
@@ -186,7 +195,7 @@ int evaluarRaton(vector<vector<char>>& tablero) {
     return distancia;
 }
 
-int minimaxRaton(vector<vector<char>>& tablero, int profundidad, bool esMaximizador, int filaRaton, int columnaRaton, int filaGato, int columnaGato) {
+int gatoMinimaxRaton(vector<vector<char>>& tablero, int profundidad, bool esMaximizador, int filaRaton, int columnaRaton, int filaGato, int columnaGato) {
     // Verificar si se alcanzó la profundidad máxima o si el juego ha terminado
     if (profundidad == 0 || gatoAtrapaRaton(tablero) || ratonAlcanzaSalida(tablero)) {
         return evaluarRaton(tablero); 
@@ -199,7 +208,7 @@ int minimaxRaton(vector<vector<char>>& tablero, int profundidad, bool esMaximiza
                 if ((i == 0 || j == 0) && movimientoValido(filaRaton + i, columnaRaton + j, filaGato, columnaGato)) {
                     tablero[filaRaton][columnaRaton] = VACIO; // Hacer el movimiento
                     tablero[filaRaton + i][columnaRaton + j] = RATON;
-                    int puntuacion = minimaxRaton(tablero, profundidad - 1, false, filaRaton + i, columnaRaton + j, filaGato, columnaGato);
+                    int puntuacion = gatoMinimaxRaton(tablero, profundidad - 1, false, filaRaton + i, columnaRaton + j, filaGato, columnaGato);
                     tablero[filaRaton][columnaRaton] = RATON; // Deshacer el movimiento
                     tablero[filaRaton + i][columnaRaton + j] = VACIO;
                     mejorPuntuacion = max(mejorPuntuacion, puntuacion);
@@ -214,7 +223,7 @@ int minimaxRaton(vector<vector<char>>& tablero, int profundidad, bool esMaximiza
                 if ((i == 0 || j == 0) && movimientoValido(filaRaton + i, columnaRaton + j, filaGato, columnaGato)) {
                     tablero[filaRaton][columnaRaton] = VACIO; // Hacer el movimiento
                     tablero[filaRaton + i][columnaRaton + j] = RATON;
-                    int puntuacion = minimaxRaton(tablero, profundidad - 1, true, filaRaton + i, columnaRaton + j, filaGato, columnaGato);
+                    int puntuacion = gatoMinimaxRaton(tablero, profundidad - 1, true, filaRaton + i, columnaRaton + j, filaGato, columnaGato);
                     tablero[filaRaton][columnaRaton] = RATON; // Deshacer el movimiento
                     tablero[filaRaton + i][columnaRaton + j] = VACIO;
                     mejorPuntuacion = min(mejorPuntuacion, puntuacion);
@@ -225,7 +234,7 @@ int minimaxRaton(vector<vector<char>>& tablero, int profundidad, bool esMaximiza
     }
 }
 
-void moverGatoMinimax(vector<vector<char>>& tablero) {
+void moverGatogatoMinimax(vector<vector<char>>& tablero) {
     int mejorPuntuacion = INT_MIN;
     int mejorFila, mejorColumna;
     int filaGato, columnaGato;
@@ -240,13 +249,13 @@ void moverGatoMinimax(vector<vector<char>>& tablero) {
         }
     }
 
-    // Calcular la mejor posición para el gato usando minimax
+    // Calcular la mejor posición para el gato usando gatoMinimax
     for (int fila = 0; fila < FILAS; fila++) {
         for (int columna = 0; columna < COLUMNAS; columna++) {
             if (tablero[fila][columna] == VACIO && esPosicionValida(tablero, fila, columna)) {
                 tablero[filaGato][columnaGato] = VACIO; // Actualizar posición actual del gato
                 tablero[fila][columna] = GATO; // Mover temporalmente el gato a una nueva posición
-                int puntuacion = minimax(tablero, PROFUNDIDAD_MAXIMA - 1, false); // Reducir la profundidad
+                int puntuacion = gatoMinimax(tablero, PROFUNDIDAD_MAXIMA - 1, false); // Reducir la profundidad
                 tablero[fila][columna] = VACIO; // Deshacer el movimiento temporal del gato
                 tablero[filaGato][columnaGato] = GATO; // Restaurar la posición original del gato
                 if (puntuacion > mejorPuntuacion) {
@@ -264,7 +273,7 @@ void moverGatoMinimax(vector<vector<char>>& tablero) {
 }
 
 
-void moverRatonMinimax(vector<vector<char>>& tablero) {
+void moverRatongatoMinimax(vector<vector<char>>& tablero) {
     int mejorPuntuacion = INT_MAX;
     int mejorFila, mejorColumna;
     int filaRaton, columnaRaton;
@@ -283,13 +292,13 @@ void moverRatonMinimax(vector<vector<char>>& tablero) {
         }
     }
 
-    // Calcular la mejor posición para el ratón usando minimax
+    // Calcular la mejor posición para el ratón usando gatoMinimax
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
             if ((i == 0 || j == 0) && movimientoValido(filaRaton + i, columnaRaton + j, filaGato, columnaGato)) {
                 tablero[filaRaton][columnaRaton] = VACIO; // Hacer el movimiento
                 tablero[filaRaton + i][columnaRaton + j] = RATON;
-                int puntuacion = minimaxRaton(tablero, PROFUNDIDAD_MAXIMA - 1, false, filaRaton + i, columnaRaton + j, filaGato, columnaGato);
+                int puntuacion = gatoMinimaxRaton(tablero, PROFUNDIDAD_MAXIMA - 1, false, filaRaton + i, columnaRaton + j, filaGato, columnaGato);
                 tablero[filaRaton][columnaRaton] = RATON; // Deshacer el movimiento
                 tablero[filaRaton + i][columnaRaton + j] = VACIO;
                 if (puntuacion < mejorPuntuacion) {
@@ -313,7 +322,7 @@ void jugarJuego() {
     cout << endl;
 
     while (true) {
-        moverGatoMinimax(tablero);
+        moverGatogatoMinimax(tablero);
         cout << endl << "MOVIMIENTO DEL GATO" << endl;
         imprimirTablero(tablero);
         
@@ -322,7 +331,7 @@ void jugarJuego() {
             break;
         }
         
-        moverRatonMinimax(tablero);
+        moverRatongatoMinimax(tablero);
         cout << endl << "Movimiento del raton" << endl;
         imprimirTablero(tablero);
         
